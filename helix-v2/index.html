@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>HELIX · Simulatore di combattimento</title>
+  <meta name="description" content="HELIX: simulatore di combattimento in prima persona con anatomia, balistica e fisiologia simulate.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="stage"></div>
+
+<div id="loading">
+  <h1>HEL<span>I</span>X</h1>
+  <div class="bar"><i id="loadBar"></i></div>
+  <p id="loadMsg">Caricamento shader e dati…</p>
+</div>
+
+<div id="hud" hidden>
+  <div id="fps"></div>
+  <div id="topbar">
+    <div class="nm"><b id="tName">—</b></div>
+    <div class="bar"><i id="tCond"></i></div>
+    <div class="ln"><span>Condizione <b id="tCondV">100%</b></span><span>Sangue perso <b id="tBlood">0.00 L</b></span></div>
+  </div>
+  <div id="cross"><i class="h" style="left:-13px"></i><i class="h" style="left:6px"></i><i class="v" style="top:-13px"></i><i class="v" style="top:6px"></i><i class="dot"></i></div>
+  <div id="scope" hidden><div class="ret"></div></div>
+  <div id="charge" hidden><i></i></div>
+  <div id="combo"></div>
+  <div id="msg"></div>
+  <div id="slow" hidden>RALLENTATORE</div>
+
+  <aside id="panel">
+    <header><h2>Anatomia</h2><span id="pTgt">—</span></header>
+    <div id="silh"></div>
+    <div id="pState">—</div>
+    <div id="vitals"></div>
+    <nav id="tabs"><button data-t="org" class="on">Organi</button><button data-t="ske">Scheletro</button><button data-t="vas">Vasi</button><button data-t="ner">Nervi</button><button data-t="mus">Muscoli</button></nav>
+    <div id="tabBody"></div>
+  </aside>
+
+  <div id="log"></div>
+
+  <section id="me">
+    <h3>Il tuo corpo</h3>
+    <div class="row2">
+      <div id="meBody"></div>
+      <div class="bars">
+        <label>Salute</label><div class="bar"><i id="pHp"></i></div>
+        <label>Fiato</label><div class="bar"><i id="pSt" style="background:var(--accent)"></i></div>
+        <label>Sangue</label><div class="bar"><i id="pBl" style="background:#a3241a"></i></div>
+        <div id="meStat"></div>
+      </div>
+    </div>
+  </section>
+
+  <div id="wpn"><div class="n" id="wName">Pugni</div><div class="a" id="wAmmo"></div></div>
+  <div id="wbar"></div>
+  <div id="vign"></div>
+  <div id="fade"></div>
+
+  <div id="kc" hidden>
+    <div class="lb top"></div><div class="lb bot"></div>
+    <div id="kcInfo"></div>
+    <div id="kcList"></div>
+    <div id="kcLabels"></div>
+    <div class="skip">Spazio / clic per saltare</div>
+  </div>
+</div>
+
+<div id="menu" hidden>
+  <div class="card">
+    <div>
+      <h1>HEL<span>I</span>X</h1>
+      <p>Simulatore di combattimento · v2. Periferia, un capannone, un parcheggio. Ogni colpo segue l'anatomia: ossa, organi, vasi e nervi. Gli avversari parano, schivano, concatenano combinazioni e possono essere armati. Anche tu incassi: le ferite cambiano come ti muovi, miri e vedi.</p>
+      <div class="keys">
+        <kbd>WASD</kbd><span>movimento · Shift corsa · Spazio salto · C accovacciati · Q/E sporgersi</span>
+        <kbd>1 … 0</kbd><span>armi · rotellina per scorrerle · G cambia oggetto da lancio</span>
+        <kbd>Mouse sx</kbd><span>jab → diretto alternati · <b>A</b>+sx / <b>D</b>+sx gancio · <b>S</b>+sx montante</span>
+        <kbd>F / V</kbd><span>calcio (S+F basso, A/D+F circolare) · gomitata</span>
+        <kbd>Mouse dx</kbd><span>guardia (pugni/mazza) · mira (armi da fuoco) · affondo (coltello)</span>
+        <kbd>Shift</kbd><span>col cecchino in mira: trattieni il respiro</span>
+        <kbd>0</kbd><span>Rasengan: tieni premuto sx = colpo ravvicinato · dx = lancio</span>
+        <kbd>B · R · X</kbd><span>benda una ferita · ricarica · rallentatore</span>
+        <kbd>Tab · H</kbd><span>cambia bersaglio · scheda anatomica</span>
+      </div>
+      <p class="combos">Combinazioni: jab-diretto · jab-jab-diretto · 1-2-gancio · diretto-gancio-montante · gancio-montante · jab-diretto-low kick · jab-gomito · diretto-circolare</p>
+    </div>
+    <form id="cfg" onsubmit="return false">
+      <label for="cN">Avversari<select id="cN"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></label>
+      <label for="cB">Comportamento<select id="cB"><option value="aggressivo">Attacca subito</option><option value="reagisce" selected>Reagisce se provocato</option><option value="cammina">Cammina, poi reagisce</option><option value="fermo">Fermo, si difende</option></select></label>
+      <label for="cK">Abilità<select id="cK"><option value="facile">Principianti</option><option value="medio" selected>Medi</option><option value="esperto">Esperti</option></select></label>
+      <label for="cA">Armi avversari<select id="cA"><option value="nessuna">Disarmati</option><option value="misto" selected>Alcuni armati</option><option value="tutti">Tutti armati</option></select></label>
+      <label for="cT">Orario<select id="cT"><option value="giorno" selected>Giorno</option><option value="tramonto">Tramonto</option><option value="notte">Notte</option></select></label>
+      <label for="cG">Grafica<select id="cG"><option value="bassa">Bassa</option><option value="media" selected>Media</option><option value="alta">Alta</option></select></label>
+      <label for="cKc">Killcam cecchino<select id="cKc"><option value="1" selected>Attiva</option><option value="0">Disattiva</option></select></label>
+      <label for="cS">Sensibilità<input id="cS" type="range" min="0.3" max="2.5" step="0.05" value="1"></label>
+      <label for="cF">Campo visivo<input id="cF" type="range" min="60" max="100" step="1" value="78"></label>
+      <label for="cV">Volume voci<input id="cV" type="range" min="0" max="1" step="0.05" value="0.8"></label>
+      <label for="cX">Sandbox<select id="cX"><option value="0">Munizioni limitate</option><option value="1">Munizioni infinite</option></select></label>
+      <div class="btns"><button id="bPlay" type="button">Inizia</button><button id="bNew" type="button" class="ghost" hidden>Nuovo round</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- three.js r149 (build globale, inclusa nel repo: funziona anche offline) -->
+<script src="vendor/three.min.js"></script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
